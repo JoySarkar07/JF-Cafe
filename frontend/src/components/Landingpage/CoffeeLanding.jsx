@@ -7,7 +7,7 @@ export default function CoffeeLanding() {
     return (
         <section
             className="relative w-full h-[95vh] flex items-center justify-center bg-cover bg-center"
-            style={{ backgroundImage: {backgroundImg} }}
+            style={{ backgroundImage: `url(${backgroundImg})` }}
         >
 
 
