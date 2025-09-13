@@ -1,0 +1,117 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import MenuItem from './MenuItem';
+
+function AdminDashboard({ user }) {
+  const [menuItems, setMenuItems] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [revenue, setRevenue] = useState({ weekly: 0, monthly: 0 });
+  const [newItem, setNewItem] = useState({ name: '', price: '', image: '', isActive: true });
+
+  useEffect(() => {
+    if (!user?.isAdmin) return;
+    fetchMenu();
+    fetchOrders();
+    fetchRevenue();
+  }, [user]);
+
+  const fetchMenu = async () => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/menu`);
+      setMenuItems(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/orders`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      setOrders(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchRevenue = async () => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/orders/revenue`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      setRevenue(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddItem = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/menu`,
+        newItem,
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+      );
+      setNewItem({ name: '', price: '', image: '', isActive: true });
+      fetchMenu();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="container mx-auto p-4 pt-20">
+      <h2 className="text-3xl font-bold mb-4">Admin Dashboard</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-white p-4 rounded shadow">
+          <h3 className="text-xl font-bold">Total Menu Items</h3>
+          <p>{menuItems.length}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h3 className="text-xl font-bold">Total Orders</h3>
+          <p>{orders.length}</p>
+        </div>
+        <div className="bg-white p-4 rounded shadow">
+          <h3 className="text-xl font-bold">Revenue</h3>
+          <p>Weekly: ${revenue.weekly}</p>
+          <p>Monthly: ${revenue.monthly}</p>
+        </div>
+      </div>
+      <h3 className="text-2xl font-bold mb-4">Add Menu Item</h3>
+      <form onSubmit={handleAddItem} className="mb-8">
+        <input
+          type="text"
+          placeholder="Name"
+          value={newItem.name}
+          onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+          className="p-2 border rounded mr-2"
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          value={newItem.price}
+          onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+          className="p-2 border rounded mr-2"
+        />
+        <input
+          type="text"
+          placeholder="Image URL"
+          value={newItem.image}
+          onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
+          className="p-2 border rounded mr-2"
+        />
+        <button type="submit" className="bg-gray-700 text-white px-4 py-2 rounded">Add Item</button>
+      </form>
+      <h3 className="text-2xl font-bold mb-4">Manage Menu</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {menuItems.map(item => (
+          <MenuItem key={item._id} item={item} isAdmin={user?.isAdmin} onUpdate={fetchMenu} onDelete={fetchMenu} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default AdminDashboard;
