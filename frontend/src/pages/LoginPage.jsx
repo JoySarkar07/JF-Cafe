@@ -2,7 +2,7 @@ import Login from '../components/Login';
 
 function LoginPage({ setUser }) {
   return (
-    <div className="pt-20">
+    <div className>
       <Login setUser={setUser} />
     </div>
   );
