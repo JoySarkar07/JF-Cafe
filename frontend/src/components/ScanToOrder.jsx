@@ -5,7 +5,7 @@ function ScanToOrder() {
   const [qrCode, setQrCode] = useState('');
 
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/qrcode`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/qrcode`) // Add backend endpoint if needed
       .then(res => setQrCode(res.data.qrCode))
       .catch(err => console.error(err));
   }, []);

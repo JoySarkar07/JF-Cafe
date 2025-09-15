@@ -4,6 +4,7 @@ import axios from 'axios';
 function CustomerProfile({ user }) {
   const [profile, setProfile] = useState({ email: '', phone: '', address: '', profilePic: '' });
   const [orders, setOrders] = useState([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -13,12 +14,13 @@ function CustomerProfile({ user }) {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/orders/my-orders`, {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/order/user`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setOrders(res.data);
     } catch (err) {
       console.error(err);
+      setError('Failed to fetch orders');
     }
   };
 
@@ -26,13 +28,14 @@ function CustomerProfile({ user }) {
     e.preventDefault();
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/auth/profile`,
+        `${process.env.REACT_APP_API_URL}/api/user/${user.userId}`,
         profile,
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
       alert('Profile updated');
     } catch (err) {
       console.error(err);
+      setError('Failed to update profile');
     }
   };
 
@@ -81,17 +84,18 @@ function CustomerProfile({ user }) {
         </div>
         <button type="submit" className="bg-gray-700 text-white px-4 py-2 rounded">Update Profile</button>
       </form>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
       <h3 className="text-2xl font-bold mt-8 mb-4">Order Details</h3>
       <ul>
         {orders.map(order => (
           <li key={order._id} className="mb-2">
-            Order #{order._id}: ${order.total.toFixed(2)} -{' '}
-            {order.items.map(item => `${item.quantity}x ${item.menuItem.name}`).join(', ')}
+            Order #{order._id}: ${order.totalAmount.toFixed(2)} - 
+            {order.product.name} x {order.quantity}
           </li>
         ))}
       </ul>
       <h3 className="text-2xl font-bold mt-8 mb-4">Reward Coins</h3>
-      <p>{user?.rewardCoins || 0} coins</p>
+      <p>{user.rewardCoins || 0} coins</p>
     </div>
   );
 }
