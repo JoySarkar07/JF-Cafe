@@ -4,7 +4,7 @@ function MenuItem({ item, isAdmin, onUpdate, onDelete }) {
   const handleToggleActive = async () => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/product/${item._id}`,
+        `${process.env.REACT_APP_API_URL}/menu/${item._id}`,
         { isActive: !item.isActive },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -16,7 +16,7 @@ function MenuItem({ item, isAdmin, onUpdate, onDelete }) {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/api/product/${item._id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/menu/${item._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       onDelete();

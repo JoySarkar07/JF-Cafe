@@ -20,6 +20,15 @@ const getOrders = async (request, response)=>{
     }
 }
 
+const getOrderOfUser = async (request, response)=>{
+    try{
+        const user = request.user;
+        response.status(200).send(await orderService.getOrderByUserId(user.userId));
+    }catch(e){
+        response.status(404).send(e.message);
+    }
+}
+
 const updateOrder = async (request, response)=>{
     try{
         response.status(200).send(await orderService.updateOrder(request.params.orderId, request.body));
@@ -44,5 +53,6 @@ module.exports = {
     addOrder,
     getOrders,
     updateOrder,
-    deleteOrder
+    deleteOrder,
+    getOrderOfUser
 }

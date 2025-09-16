@@ -8,6 +8,8 @@ router.post("/", authenticateUser, orderController.addOrder);
 
 router.get("/", authenticateUser, orderController.getOrders);
 
+router.get("/my-orders", authenticateUser, orderController.getOrderOfUser);
+
 router.patch("/:orderId", authenticateUser, orderController.updateOrder);
 
 router.delete("/:orderId", authenticateUser, orderController.deleteOrder);

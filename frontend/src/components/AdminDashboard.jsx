@@ -3,21 +3,22 @@ import axios from 'axios';
 import MenuItem from './MenuItem';
 
 function AdminDashboard({ user }) {
-  const [products, setProducts] = useState([]);
+  const [menuItems, setMenuItems] = useState([]);
   const [orders, setOrders] = useState([]);
   const [revenue, setRevenue] = useState({ weekly: 0, monthly: 0 });
   const [newItem, setNewItem] = useState({ name: '', price: '', image: '', isActive: true });
 
   useEffect(() => {
-    if (!user || user.role !== 'ADMIN') return;
-    fetchProducts();
+    if (user?.role==="USER") return;
+    // fetchMenu();
     fetchOrders();
+    // fetchRevenue();
   }, [user]);
 
-  const fetchProducts = async () => {
+  const fetchMenu = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/product`);
-      setProducts(res.data);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/menu`);
+      setMenuItems(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -25,42 +26,37 @@ function AdminDashboard({ user }) {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/order`, {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/order`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
+      console.log(res.data);
       setOrders(res.data);
-      calculateRevenue(res.data);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const calculateRevenue = (orders) => {
-    const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    const weekly = orders
-      .filter(order => new Date(order.createdAt) > oneWeekAgo)
-      .reduce((sum, order) => sum + order.totalAmount, 0);
-
-    const monthly = orders
-      .filter(order => new Date(order.createdAt) > oneMonthAgo)
-      .reduce((sum, order) => sum + order.totalAmount, 0);
-
-    setRevenue({ weekly, monthly });
+  const fetchRevenue = async () => {
+    try {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/orders/revenue`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      setRevenue(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleAddItem = async (e) => {
     e.preventDefault();
     try {
       await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/product`,
-        { ...newItem, quantity: 100, discount: 0, category: 'default', description: '' }, // Align with backend Product schema
+        `${process.env.REACT_APP_API_URL}/menu`,
+        newItem,
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
       setNewItem({ name: '', price: '', image: '', isActive: true });
-      fetchProducts();
+      fetchMenu();
     } catch (err) {
       console.error(err);
     }
@@ -72,7 +68,7 @@ function AdminDashboard({ user }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-white p-4 rounded shadow">
           <h3 className="text-xl font-bold">Total Menu Items</h3>
-          <p>{products.length}</p>
+          <p>{menuItems.length}</p>
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h3 className="text-xl font-bold">Total Orders</h3>
@@ -80,8 +76,8 @@ function AdminDashboard({ user }) {
         </div>
         <div className="bg-white p-4 rounded shadow">
           <h3 className="text-xl font-bold">Revenue</h3>
-          <p>Weekly: ${revenue.weekly.toFixed(2)}</p>
-          <p>Monthly: ${revenue.monthly.toFixed(2)}</p>
+          <p>Weekly: ${revenue.weekly}</p>
+          <p>Monthly: ${revenue.monthly}</p>
         </div>
       </div>
       <h3 className="text-2xl font-bold mb-4">Add Menu Item</h3>
@@ -111,8 +107,8 @@ function AdminDashboard({ user }) {
       </form>
       <h3 className="text-2xl font-bold mb-4">Manage Menu</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {products.map(item => (
-          <MenuItem key={item._id} item={item} isAdmin={user.role === 'ADMIN'} onUpdate={fetchProducts} onDelete={fetchProducts} />
+        {menuItems.map(item => (
+          <MenuItem key={item._id} item={item} isAdmin={user?.isAdmin} onUpdate={fetchMenu} onDelete={fetchMenu} />
         ))}
       </div>
     </div>

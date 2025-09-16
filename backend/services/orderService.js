@@ -26,6 +26,10 @@ const getOrders = async ()=>{
     return fullOrder;
 }
 
+const getOrderByUserId = async (userId)=>{
+    return await Order.find({userId})
+}
+
 const updateOrder = async (id, updatedValue)=>{
     return await Order.findByIdAndUpdate(
         id,
@@ -42,5 +46,6 @@ module.exports = {
     addOrder,
     getOrders,
     updateOrder,
-    deleteOrder
+    deleteOrder,
+    getOrderByUserId
 }

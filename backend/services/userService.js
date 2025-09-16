@@ -24,7 +24,7 @@ const login = async (email, password)=>{
     }
 
     const token = jwt.sign(
-        { userId: existingUser._id, email: existingUser.email, address: existingUser.address, role: existingUser.role },
+        { userId: existingUser._id, email: existingUser.email, address: existingUser.address, phone: existingUser.phone, role: existingUser.role },
         process.env.JWT_SECRET || 'your-secret-key',
         { expiresIn: '24h' }
     );

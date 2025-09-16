@@ -4,23 +4,23 @@ import axios from 'axios';
 function CustomerProfile({ user }) {
   const [profile, setProfile] = useState({ email: '', phone: '', address: '', profilePic: '' });
   const [orders, setOrders] = useState([]);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!user) return;
+    console.log(user);
     setProfile({ email: user.email, phone: user.phone || '', address: user.address || '', profilePic: user.profilePic || '' });
     fetchOrders();
   }, [user]);
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/order/user`, {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/order/my-orders`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
+      console.log(res.data);
       setOrders(res.data);
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch orders');
     }
   };
 
@@ -28,14 +28,13 @@ function CustomerProfile({ user }) {
     e.preventDefault();
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/user/${user.userId}`,
+        `${process.env.REACT_APP_API_URL}/auth/profile`,
         profile,
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
       alert('Profile updated');
     } catch (err) {
       console.error(err);
-      setError('Failed to update profile');
     }
   };
 
@@ -84,18 +83,17 @@ function CustomerProfile({ user }) {
         </div>
         <button type="submit" className="bg-gray-700 text-white px-4 py-2 rounded">Update Profile</button>
       </form>
-      {error && <p className="text-red-500 mt-4">{error}</p>}
       <h3 className="text-2xl font-bold mt-8 mb-4">Order Details</h3>
       <ul>
         {orders.map(order => (
           <li key={order._id} className="mb-2">
-            Order #{order._id}: ${order.totalAmount.toFixed(2)} - 
-            {order.product.name} x {order.quantity}
+            Order #{order._id}: ${order.amount.toFixed(2)} -{' '}
+            {order.map(item => `${item.quantity}x ${item.menuItem.name}`).join(', ')}
           </li>
         ))}
       </ul>
       <h3 className="text-2xl font-bold mt-8 mb-4">Reward Coins</h3>
-      <p>{user.rewardCoins || 0} coins</p>
+      <p>{user?.rewardCoins || 0} coins</p>
     </div>
   );
 }
